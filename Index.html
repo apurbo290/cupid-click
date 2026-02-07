@@ -468,13 +468,17 @@
             const nameParam = urlParams.get('name');
             
             if (nameParam) {
-                const name = decodeURIComponent(nameParam);
+                const name = sanitizeName(decodeURIComponent(nameParam));
                 displayName.textContent = name;
                 greetingText.style.display = 'block';
                 return name;
             }
             return null;
         }
+
+        function sanitizeName(name) {
+            return name.replace(/[^a-zA-Z\s'-]/g, '').substring(0, 50);
+        }  
 
         function getValentineWish() {
             const today = new Date();
