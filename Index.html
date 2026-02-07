@@ -293,10 +293,6 @@
             transform: scale(1.05);
         }
 
-        #noBtn:hover {
-            transform: scale(1.05);
-        }
-
         .celebration {
             display: none;
             position: fixed;
@@ -450,12 +446,10 @@
     </div>
 
     <div class="celebration" id="celebration">
-        <h2>So it’s a YESS..!!</h2>
-        <p id="celebrationMessage" style="font-size: 2.2em;">Well… that’s the answer I was waiting for. 💖</p>
+        <h2>So it's a YESS..!!</h2>
+        <p id="celebrationMessage" style="font-size: 2.2em;">Well… that's the answer I was waiting for. 💖</p>
         <p style="font-size: 1.5em; margin-top: 15px; font-style: italic; opacity: 0.95;">Now I officially have the best Valentine plan! ✨</p>
-        <!-- <p style="font-size: 1.8em; margin-top: 25px; font-weight: 800;">getValentineWish()</p> -->
-         <p id="valWish" style="font-size: 1.8em; margin-top: 25px; font-weight: 800;"></p>
-
+        <p id="valWish" style="font-size: 1.8em; margin-top: 25px; font-weight: 800;"></p>
     </div>
 
     <script>
@@ -485,7 +479,7 @@
         function getValentineWish() {
             const today = new Date();
             const year = today.getFullYear();
-            const valentine = new Date(year, 1, 14); // Feb = month 1
+            const valentine = new Date(year, 1, 14);
             if (today.getDate() === 14 && today.getMonth() === 1) {
                 return "💖 Happy Valentine's Day 💖";
             }
@@ -495,7 +489,6 @@
             return "💖 Happy Valentine's Day! 💖";
         }
         document.getElementById("valWish").textContent = getValentineWish();
-
 
         const userName = getNameFromURL();
 
@@ -510,30 +503,36 @@
 
         initializeNoButton();
 
-        // Make No button run away from cursor
+        // Track mouse position
         document.addEventListener('mousemove', (e) => {
+            window.lastMouseX = e.clientX;
+            window.lastMouseY = e.clientY;
+        });
+
+        // Make No button run away from cursor - continuous checking
+        function checkNoBtnDistance() {
             if (celebration.style.display === 'flex') return;
 
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
-            
             const rect = noBtn.getBoundingClientRect();
             const btnCenterX = rect.left + rect.width / 2;
             const btnCenterY = rect.top + rect.height / 2;
 
+            // Get current mouse position from last mousemove event
+            if (!window.lastMouseX || !window.lastMouseY) return;
+
             const distance = Math.sqrt(
-                Math.pow(mouseX - btnCenterX, 2) + 
-                Math.pow(mouseY - btnCenterY, 2)
+                Math.pow(window.lastMouseX - btnCenterX, 2) + 
+                Math.pow(window.lastMouseY - btnCenterY, 2)
             );
 
-            const threshold = 200; // Increased detection range
-            const extraDistance = 100; // Increased escape distance
+            const threshold = 250;
+            const minDistance = 120;
 
             if (distance < threshold) {
-                const angle = Math.atan2(btnCenterY - mouseY, btnCenterX - mouseX);
+                const angle = Math.atan2(btnCenterY - window.lastMouseY, btnCenterX - window.lastMouseX);
                 const force = (threshold - distance) / threshold;
                 
-                const moveDistance = (150 * force) + extraDistance; // Increased movement
+                const moveDistance = Math.max(minDistance, 200 * force);
                 const newX = Math.cos(angle) * moveDistance;
                 const newY = Math.sin(angle) * moveDistance;
 
@@ -545,9 +544,12 @@
                 const clampedY = Math.max(-maxY, Math.min(maxY, newY));
 
                 noBtn.style.transform = `translate(${clampedX}px, ${clampedY}px)`;
-                noBtn.style.transition = 'transform 0.1s ease-out'; // Faster reaction
+                noBtn.style.transition = 'transform 0.08s ease-out';
             }
-        });
+        }
+
+        // Check distance continuously
+        setInterval(checkNoBtnDistance, 1);
 
         // Reset No button position when mouse leaves window or window loses focus
         document.addEventListener('mouseleave', () => {
@@ -566,8 +568,8 @@
         // Yes button click
         yesBtn.addEventListener('click', () => {
             const celebrationMsg = userName 
-                ? `Honestly ${userName}, that’s the answer I was waiting for ❤️` 
-                : `Well… that’s the answer I was waiting for ❤️`;
+                ? `Honestly ${userName}, that's the answer I was waiting for ❤️` 
+                : `Well… that's the answer I was waiting for ❤️`;
             document.getElementById('celebrationMessage').innerHTML = celebrationMsg;
             celebration.style.display = 'flex';
             
@@ -589,7 +591,7 @@
                 }, i * 20);
             }
 
-            // Create heart explosion from center (Valentine themed)
+            // Create heart explosion from center
             const heartExplosion = ['💖', '💝', '💗', '💓', '💕', '❤️', '💘', '🌹', '🌺', '💐'];
             for (let i = 0; i < 35; i++) {
                 setTimeout(() => {
@@ -614,7 +616,7 @@
                 }, i * 30);
             }
 
-            // Create romantic emoji burst (Valentine themed)
+            // Create romantic emoji burst
             const romanticEmojis = ['✨', '💫', '⭐', '🌟', '💕', '💖', '🎀', '🌹', '💐', '🦋'];
             for (let i = 0; i < 25; i++) {
                 setTimeout(() => {
@@ -629,7 +631,7 @@
                 }, i * 100);
             }
 
-            // Add gentle sparkle effect (softer, more romantic)
+            // Add gentle sparkle effect
             setInterval(() => {
                 const sparkle = document.createElement('div');
                 sparkle.className = 'confetti';
@@ -645,9 +647,7 @@
 
             celebration.style.display = 'flex';
             document.getElementById("valWish").textContent = getValentineWish();
-
         });
-
 
         // No button click (just in case someone manages to click it)
         noBtn.addEventListener('click', (e) => {
